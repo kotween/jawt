@@ -24,47 +24,77 @@ if (-not (Test-Path $BindgenPath)) {
 # Update submodules
 & "git" "submodule" "update" "--init" "--recursive";
 
-$JniIncludeDir = "./jdk/src/java.base/share/native/include";
-$JniPlatformIncludeDir = @{
-    Windows = "./jdk/src/java.base/windows/native/include";
+function Normalize-Path {
+    param ([string] $Path);
+    return (Resolve-Path $Path).Path;
+}
+
+$JniIncludeDir = Normalize-Path "./jdk/src/java.base/share/native/include";
+$JniHeader = Normalize-Path "$JniIncludeDir/jni.h";
+
+$JniPlatformIncludeDir = Normalize-Path @{
+    Windows = ".\jdk\src\java.base\windows\native\include";
     MacOS   = "./jdk/src/java.base/unix/native/include";
     Unix    = "./jdk/src/java.base/unix/native/include";
 }[$Platform];
-$JawtIncludeDir = "./jdk/src/java.desktop/share/native/include";
-$JawtPlatformIncludeDir = @{
-    Windows = "./jdk/src/java.desktop/windows/native/include";
+$JniPlatformHeader = Normalize-Path "$JniPlatformIncludeDir/jni_md.h";
+
+$JawtIncludeDir = Normalize-Path "./jdk/src/java.desktop/share/native/include";
+$JawtHeader = Normalize-Path "$JawtIncludeDir/jawt.h";
+
+$JawtPlatformIncludeDir = Normalize-Path @{
+    Windows = ".\jdk\src\java.desktop\windows\native\include";
     MacOS   = "./jdk/src/java.desktop/macosx/native/include";
     Unix    = "./jdk/src/java.desktop/unix/native/include";
 }[$Platform];
-$InputHeader = "./bindings.h";
-$OutputBindings = @{
-    Windows = "./jawt-sys/src/bindings_windows.rs";
+$JawtPlatformHeader = Normalize-Path "$JawtPlatformIncludeDir/jawt_md.h";
+
+$InputHeader = Normalize-Path "./bindings.h";
+$OutputBindings = Normalize-Path @{
+    Windows = ".\jawt-sys\src\bindings_windows.rs";
     MacOS   = "./jawt-sys/src/bindings_macos.rs";
     Unix    = "./jawt-sys/src/bindings_unix.rs";
 }[$Platform];
 $AdditionalParams = @{
-    Windows = @();
+    Windows = @(
+        "--raw-line", "use windows_sys::Win32::Foundation::HWND;",
+        "--raw-line", "use windows_sys::Win32::Graphics::Gdi::{HBITMAP, HDC, HPALETTE};",
+        # To avoid jawt_Win32DrawingSurfaceInfo__bindgen_ty_1 being generated as
+        # a bindgen-generated wrapper struct
+        "--allowlist-item", "HWND",
+        "--allowlist-item", "HBITMAP",
+        "--allowlist-item", "HDC",
+        "--allowlist-item", "HPALETTE"
+    );
     MacOS   = @();
     Unix    = @(
         "--raw-line", "use use x11_dl::xlib::{Colormap, Display, Drawable, VisualID};"
     );
 }[$Platform];
 
-& $BindgenPath                                              `
-    $InputHeader "-o" $OutputBindings                       `
-    "--no-recursive-allowlist"                              `
-    "--raw-line" "#![allow(non_camel_case_types)]"          `
-    "--raw-line" "#![allow(non_snake_case)]"                `
-    "--raw-line" ""                                         `
-    "--raw-line" "use jni_sys::*;"                          `
-    $AdditionalParams                                       `
-    "--blocklist-file" "$JniIncludeDir/jni.h"               `
-    "--blocklist-file" "$JniPlatformIncludeDir/jni_md.h"    `
-    "--allowlist-file" "$JawtIncludeDir/jawt.h"             `
-    "--allowlist-file" "$JawtPlatformIncludeDir/jawt_md.h"  `
-    "--rust-target" "1.73"                                  `
-    "--"                                                    `
-    "-I$JniIncludeDir"                                      `
-    "-I$JniPlatformIncludeDir"                              `
-    "-I$JawtIncludeDir"                                     `
+# .Replace("\", "\\") is to escape \ in regex
+& $BindgenPath                                                  `
+    $InputHeader "-o" $OutputBindings                           `
+    "--no-recursive-allowlist"                                  `
+    "--raw-line" "#![allow(non_camel_case_types)]"              `
+    "--raw-line" "#![allow(non_snake_case)]"                    `
+    "--raw-line" ""                                             `
+    "--raw-line" "use jni_sys::*;"                              `
+    $AdditionalParams                                           `
+    "--blocklist-file" $JniHeader.Replace("\", "\\")            `
+    "--blocklist-file" $JniPlatformHeader.Replace("\", "\\")    `
+    "--allowlist-file" $JawtHeader.Replace("\", "\\")           `
+    "--allowlist-file" $JawtPlatformHeader.Replace("\", "\\")   `
+    "--rust-target" "1.73"                                      `
+    "--"                                                        `
+    "-I$JniIncludeDir"                                          `
+    "-I$JniPlatformIncludeDir"                                  `
+    "-I$JawtIncludeDir"                                         `
     "-I$JawtPlatformIncludeDir";
+
+# Postprocessing
+if ($Platform -eq "Windows") {
+    $Content = Get-Content $OutputBindings;
+    $Content = $Content -replace "pub type (HWND|HBITMAP|HDC|HPALETTE) = .*;", "";
+    Set-Content -Path $OutputBindings -Value $Content;
+}
