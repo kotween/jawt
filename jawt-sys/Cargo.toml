@@ -1,9 +1,16 @@
 [package]
 name = "jawt-sys"
-description = "Cross-platform Rust bindings to Java AWT"
+description = "Raw bindings to Java AWT"
+homepage = "https://github.com/kotween/jawt"
+repository = "https://github.com/kotween/jawt"
+readme = "README.md"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.73"
+categories = ["external-ffi-bindings"]
+keywords = ["java", "jni", "jawt", "awt"]
+license = "MIT OR Apache-2.0"
+exclude = [".bindgen"]
 
 [dependencies]
 jni-sys = "0.3.0"

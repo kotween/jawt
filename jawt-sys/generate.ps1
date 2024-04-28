@@ -29,31 +29,31 @@ function Normalize-Path {
     return (Resolve-Path $Path).Path;
 }
 
-$JniIncludeDir = Normalize-Path "./jdk/src/java.base/share/native/include";
+$JniIncludeDir = Normalize-Path "../jdk/src/java.base/share/native/include";
 $JniHeader = Normalize-Path "$JniIncludeDir/jni.h";
 
 $JniPlatformIncludeDir = Normalize-Path @{
-    Windows = ".\jdk\src\java.base\windows\native\include";
-    MacOS   = "./jdk/src/java.base/unix/native/include";
-    Unix    = "./jdk/src/java.base/unix/native/include";
+    Windows = "..\jdk\src\java.base\windows\native\include";
+    MacOS   = "../jdk/src/java.base/unix/native/include";
+    Unix    = "../jdk/src/java.base/unix/native/include";
 }[$Platform];
 $JniPlatformHeader = Normalize-Path "$JniPlatformIncludeDir/jni_md.h";
 
-$JawtIncludeDir = Normalize-Path "./jdk/src/java.desktop/share/native/include";
+$JawtIncludeDir = Normalize-Path "../jdk/src/java.desktop/share/native/include";
 $JawtHeader = Normalize-Path "$JawtIncludeDir/jawt.h";
 
 $JawtPlatformIncludeDir = Normalize-Path @{
-    Windows = ".\jdk\src\java.desktop\windows\native\include";
-    MacOS   = "./jdk/src/java.desktop/macosx/native/include";
-    Unix    = "./jdk/src/java.desktop/unix/native/include";
+    Windows = "..\jdk\src\java.desktop\windows\native\include";
+    MacOS   = "../jdk/src/java.desktop/macosx/native/include";
+    Unix    = "../jdk/src/java.desktop/unix/native/include";
 }[$Platform];
 $JawtPlatformHeader = Normalize-Path "$JawtPlatformIncludeDir/jawt_md.h";
 
 $InputHeader = Normalize-Path "./bindings.h";
 $OutputBindings = Normalize-Path @{
-    Windows = ".\jawt-sys\src\bindings_windows.rs";
-    MacOS   = "./jawt-sys/src/bindings_macos.rs";
-    Unix    = "./jawt-sys/src/bindings_unix.rs";
+    Windows = ".\src\bindings_windows.rs";
+    MacOS   = "./src/bindings_macos.rs";
+    Unix    = "./src/bindings_unix.rs";
 }[$Platform];
 $AdditionalParams = @{
     Windows = @(
