@@ -7,3 +7,6 @@ rust-version = "1.73"
 
 [dependencies]
 jni-sys = "0.3.0"
+
+[target.'cfg(all(target_family = "unix", not(target_vendor = "apple"), not(target_os = "android")))'.dependencies]
+x11-dl = "2.19.1"

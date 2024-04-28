@@ -42,6 +42,13 @@ $OutputBindings = @{
     MacOS   = "./jawt-sys/src/bindings_macos.rs";
     Unix    = "./jawt-sys/src/bindings_unix.rs";
 }[$Platform];
+$AdditionalParams = @{
+    Windows = @();
+    MacOS   = @();
+    Unix    = @(
+        "--raw-line", "use use x11_dl::xlib::{Colormap, Display, Drawable, VisualID};"
+    );
+}[$Platform];
 
 & $BindgenPath                                              `
     $InputHeader "-o" $OutputBindings                       `
@@ -50,6 +57,7 @@ $OutputBindings = @{
     "--raw-line" "#![allow(non_snake_case)]"                `
     "--raw-line" ""                                         `
     "--raw-line" "use jni_sys::*;"                          `
+    $AdditionalParams                                       `
     "--blocklist-file" "$JniIncludeDir/jni.h"               `
     "--blocklist-file" "$JniPlatformIncludeDir/jni_md.h"    `
     "--allowlist-file" "$JawtIncludeDir/jawt.h"             `

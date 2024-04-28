@@ -14,9 +14,9 @@ Run [./generate.ps1](./generate.ps1) on PowerShell. This will install bindgen 0.
 
 ### jawt-sys
 
-| jawt-sys | OpenJDK | jni-sys | MSRV |
-| -------- | ------- | ------- | ---- |
-| 0.1.0    | 17      | 0.4.0   | 1.73 |
+| jawt-sys | OpenJDK | jni-sys | x11-dl | MSRV |
+| -------- | ------- | ------- | ------ | ---- |
+| 0.1.0    | 17      | 0.4.0   | 2.19.1 | 1.73 |
 
 ## Licensing
 
