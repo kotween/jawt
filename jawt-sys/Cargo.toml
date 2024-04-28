@@ -1,0 +1,9 @@
+[package]
+name = "jawt-sys"
+description = "Cross-platform Rust bindings to Java AWT"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.73"
+
+[dependencies]
+jni-sys = "0.3.0"
